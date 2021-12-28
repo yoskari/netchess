@@ -1,3 +1,5 @@
+from constants import WHITE_UNITS, BLACK_UNITS
+
 def move(start, target, board, score):
     sx, sy = start
     tx, ty = target
@@ -14,12 +16,9 @@ def move(start, target, board, score):
     board[ty][tx] = unit
     return board, score, winner
 
-white_units = [1, 2, 3, 4, 5, 6]
-black_units = [7, 8, 9, 10, 11, 12]
-
 def get_possible_moves(selected, board):
     def pawn_movement(moves=2):
-        if friendly_units == white_units:
+        if friendly_units == WHITE_UNITS:
             for move_y in range(1, moves+1):
                 if y + move_y > 7:
                     break
@@ -30,7 +29,7 @@ def get_possible_moves(selected, board):
                     possible_moves.append((x, y+move_y))
             positions = [(x+1, y+1), (x-1, y+1)]
 
-        if friendly_units == black_units:
+        if friendly_units == BLACK_UNITS:
             for move_y in range(1, moves+1):
                 if y - move_y < 0:
                     break
@@ -139,10 +138,10 @@ def get_possible_moves(selected, board):
     possible_moves = []
     x, y = selected
     selected_unit = board[y][x]
-    if selected_unit in white_units:
-        friendly_units = white_units
-    elif selected_unit in black_units:
-        friendly_units = black_units
+    if selected_unit in WHITE_UNITS:
+        friendly_units = WHITE_UNITS
+    elif selected_unit in BLACK_UNITS:
+        friendly_units = BLACK_UNITS
     # pawn movement
     if selected_unit in [6, 12]:
         pawn_movement()
