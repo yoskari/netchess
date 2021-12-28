@@ -58,7 +58,7 @@ def get_possible_moves(selected, board):
             (x-1, y-2),
         ]
         for pos_x, pos_y in positions:
-            if 8 > pos_x > 0 and 8 > pos_y > 0:
+            if 8 > pos_x >= 0 and 8 > pos_y >= 0:
                 if board[pos_y][pos_x] not in friendly_units:
                     possible_moves.append((pos_x, pos_y))
 
