@@ -12,9 +12,6 @@ Chess engine made with python and pygame.
 * score
 * shows which tiles can be moved to
 
-## Issues
-Multiplayer is unplayably slow
-
 ### Singleplayer
 ```
 python singleplayer.py

@@ -28,11 +28,11 @@ selected = ()
 
 possible_moves = []
 turn = "white"
+player_turn = ""
+players = []
 friendly_units = WHITE_UNITS
-score = {
-    "white": 0,
-    "black": 0,
-}
+score = {}
+winner = ""
 
 # initialize list/set of all connected client's sockets
 client_sockets = set()
@@ -43,11 +43,11 @@ s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 # bind the socket to the address we specified
 s.bind((HOST, PORT))
 # listen for upcoming connections
-s.listen()
+s.listen(2)
 print(f"[*] Listening as {HOST}:{PORT}")
 
 def listen_for_client(cs):
-    global selected, board, possible_moves, turn, friendly_units, score, board_squeres
+    global selected, board, possible_moves, turn, friendly_units, score, board_squeres, player_turn, winner
     """
     This function keep listening for a message from `cs` socket
     Whenever a message is received, broadcast it to all other connected clients
@@ -63,8 +63,10 @@ def listen_for_client(cs):
             print(f"[!] Error: {e}")
             client_sockets.remove(cs)
         else:
-            print("logic start")
             sender, coordinates = msg.split("<SEP>")
+            print(player_turn)
+            if sender != player_turn:
+                continue
             mousepos = tuple([int(i) for i in coordinates.split(",")])
 
             target = ()
@@ -78,9 +80,7 @@ def listen_for_client(cs):
                         possible_moves = get_possible_moves(selected, board)
                 else:
                     if target in possible_moves:
-                        board, score[turn], winner = move(selected, target, board, score[turn])
-                        if winner != "":
-                            victory(winner, screen)
+                        board, score[player_turn], winner = move(selected, target, board, score[player_turn])
                         possible_moves = []
                         if turn == "white":
                             turn = "black"
@@ -88,6 +88,10 @@ def listen_for_client(cs):
                         else:
                             turn = "white"
                             friendly_units = WHITE_UNITS
+                        if player_turn == players[0]:
+                            player_turn = players[1]
+                        else:
+                            player_turn = players[0]
                     else:
                         possible_moves = []
                     selected = ()
@@ -96,9 +100,9 @@ def listen_for_client(cs):
                 "selected": selected,
                 "score": score,
                 "possible_moves": possible_moves,
-                "turn": turn,
+                "turn": player_turn+": "+turn,
+                "winner": winner,
             }
-            print("logic end")
             # iterate over all connected sockets
             for client_socket in client_sockets:
                 print("sending game data to:")
@@ -110,6 +114,11 @@ while True:
     # we keep listening for new connections all the time
     client_socket, client_address = s.accept()
     print(f"[+] {client_address} connected.")
+    playername = client_socket.recv(1024).decode()
+    if player_turn == "":
+        player_turn = playername
+    score[playername] = 0
+    players.append(playername)
     # add the new connected client to connected sockets
     client_sockets.add(client_socket)
     # start a new thread that listens for each client's messages
@@ -118,6 +127,18 @@ while True:
     t.daemon = True
     # start the thread
     t.start()
+    if len(client_sockets) > 1:
+        msg = {
+            "board": board,
+            "selected": selected,
+            "score": score,
+            "possible_moves": possible_moves,
+            "turn": player_turn+": "+turn,
+        }
+        for client_socket in client_sockets:
+            client_socket.send("start".encode())
+        for client_socket in client_sockets:
+            client_socket.send(pickle.dumps(msg))
 
 # close client sockets
 for cs in client_sockets:
