@@ -1,3 +1,5 @@
+![chess.png](https://github.com/yoskari/netchess/blob/main/chess.png)
+
 # Netchess
 Chess engine made with python and pygame.
 
