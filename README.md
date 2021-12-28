@@ -7,6 +7,14 @@ Chess engine made with python and pygame.
 * python3
 * pygame
 
+## Features
+* regular chess movement
+* score
+* shows which tiles can be moved to
+
+## Issues
+Multiplayer is unplayably slow
+
 ### Singleplayer
 ```
 python singleplayer.py
