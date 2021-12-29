@@ -73,11 +73,15 @@ def listen_for_client(cs):
                 if squere.collidepoint(mousepos):
                     target = (squere.x // 80, squere.y // 80)
             if target != ():
+                print(f"target: {target}")
                 if selected == ():
+                    print("no tile selected, selecting...")
                     if board[target[1]][target[0]] != 0 and board[target[1]][target[0]] in friendly_units:
                         selected = target
                         possible_moves = get_possible_moves(selected, board)
                 else:
+                    print(f"possible moves: {possible_moves}")
+                    print(f"target in possible moves? {target in possible_moves}")
                     if target in possible_moves:
                         board, score[player_turn], winner = move(selected, target, board, score[player_turn])
                         possible_moves = []
@@ -106,13 +110,13 @@ def listen_for_client(cs):
             for i, client_socket in enumerate(client_sockets):
                 print("sending game data to:", players[i])
                 # and send the message
-                client_socket.send(pickle.dumps(msg))
+                client_socket.sendall(pickle.dumps(msg))
 
 while True:
     # we keep listening for new connections all the time
     client_socket, client_address = s.accept()
     print(f"[+] {client_address} connected.")
-    playername = client_socket.recv(1024).decode()
+    playername = client_socket.recv(64).decode()
     if player_turn == "":
         player_turn = playername
     score[playername] = 0

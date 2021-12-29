@@ -29,12 +29,16 @@ def listen_for_messages():
         msg = s.recv(1024)
         msg = pickle.loads(msg)
         if type(msg) == dict:
+            print("Got game data")
             board = msg["board"]
             selected = msg["selected"]
             score = msg["score"]
             possible_moves = msg["possible_moves"]
             turn = msg["turn"]
             winner = msg["winner"]
+        else:
+            print("Got invalid data")
+            print(msg)
 
 s.send(client_id.encode())
 print("waiting for the other player to join...")
