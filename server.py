@@ -64,7 +64,6 @@ def listen_for_client(cs):
             client_sockets.remove(cs)
         else:
             sender, coordinates = msg.split("<SEP>")
-            print(player_turn)
             if sender != player_turn:
                 continue
             mousepos = tuple([int(i) for i in coordinates.split(",")])
@@ -104,9 +103,8 @@ def listen_for_client(cs):
                 "winner": winner,
             }
             # iterate over all connected sockets
-            for client_socket in client_sockets:
-                print("sending game data to:")
-                print(client_socket)
+            for i, client_socket in enumerate(client_sockets):
+                print("sending game data to:", players[i])
                 # and send the message
                 client_socket.send(pickle.dumps(msg))
 
