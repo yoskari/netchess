@@ -100,10 +100,12 @@ def main():
         friendly_units = BLACK_UNITS
     
     white = True
-    pygame.event.set_blocked(None)
-    pygame.event.set_allowed([pygame.QUIT, pygame.MOUSEBUTTONDOWN])
+
+    #pygame.event.set_blocked(None)
+    #pygame.event.set_allowed([pygame.QUIT, pygame.MOUSEBUTTONDOWN])
     while True:
         for event in pygame.event.get():
+            print(event)
             if event.type == pygame.QUIT:
                 s.close()
                 pygame.quit()
