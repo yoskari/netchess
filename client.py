@@ -123,42 +123,42 @@ while True:
                 print("sending: ", msg)
                 s.send(msg.encode())
 
-        screen.fill(WHITE)
-        display.fill(DARK)
+    screen.fill(WHITE)
+    display.fill(DARK)
 
-        for y, row in enumerate(board):
-            for x, squere in enumerate(row):
-                white = not white
-                if white:
-                    display.blit(board_tile, (x*TILE_SIZE, y*TILE_SIZE))
-                if squere != 0:
-                    display.blit(images[squere-1], (x*TILE_SIZE, y*TILE_SIZE))
+    for y, row in enumerate(board):
+        for x, squere in enumerate(row):
             white = not white
+            if white:
+                display.blit(board_tile, (x*TILE_SIZE, y*TILE_SIZE))
+            if squere != 0:
+                display.blit(images[squere-1], (x*TILE_SIZE, y*TILE_SIZE))
+        white = not white
 
-        if selected != ():
-            selection_rect.x = selected[0]*80
-            selection_rect.y = selected[1]*80
-            pygame.draw.rect(display, BLACK, selection_rect, 2)
+    if selected != ():
+        selection_rect.x = selected[0]*80
+        selection_rect.y = selected[1]*80
+        pygame.draw.rect(display, BLACK, selection_rect, 2)
 
-        for pmove in possible_moves:
-            move_rect = pygame.Rect(pmove[0]*80, pmove[1]*80, 80, 80)
-            pygame.draw.rect(display, GREEN, move_rect, 2)
+    for pmove in possible_moves:
+        move_rect = pygame.Rect(pmove[0]*80, pmove[1]*80, 80, 80)
+        pygame.draw.rect(display, GREEN, move_rect, 2)
 
-        if winner != "":
-            victory(winner, screen)
+    if winner != "":
+        victory(winner, screen)
 
-        screen.blit(display, (70, 70))
-        for i in range(8):
-            print_text(f"{i}", 40, 90+i*80, screen)
-        for i in range(8):
-            print_text(f"{i}", 100+i*80, 30, screen)
+    screen.blit(display, (70, 70))
+    for i in range(8):
+        print_text(f"{i}", 40, 90+i*80, screen)
+    for i in range(8):
+        print_text(f"{i}", 100+i*80, 30, screen)
 
-        for i, keyvalue in enumerate(score.items()):
-            key, value = keyvalue
-            if i == 0:
-                print_text(f"{key}'s score: {value}", 0, 750, screen, 0)
-            elif i == 1:
-                print_text(f"{key}'s score: {value}", 800, 750, screen, 2)
-        print_text(f"Turn: {turn}", 400, 750, screen, 1)
-        pygame.display.update()
-        clock.tick(30)
+    for i, keyvalue in enumerate(score.items()):
+        key, value = keyvalue
+        if i == 0:
+            print_text(f"{key}'s score: {value}", 0, 750, screen, 0)
+        elif i == 1:
+            print_text(f"{key}'s score: {value}", 800, 750, screen, 2)
+    print_text(f"Turn: {turn}", 400, 750, screen, 1)
+    pygame.display.update()
+    clock.tick(30)

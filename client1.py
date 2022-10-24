@@ -160,13 +160,11 @@ def main():
                 print_text(f"{key}'s score: {value}", 0, 750, screen, 0)
             elif i == 1:
                 print_text(f"{key}'s score: {value}", 800, 750, screen, 2)
-        print(f"updating - id: {random.random()}")
         print_text(f"Turn: {turn}", 400, 750, screen, 1)
         print_text(f"fps: {int(clock.get_fps())}", 0, 0, screen, 0)
         pygame.display.update()
         clock.tick()
         # netcode
-        print("before netcode")
         ready = select.select([s], [], [], 0.01)
         if ready[0]:
             msg = s.recv(1024)
@@ -189,7 +187,6 @@ def main():
             else:
                 print("Got invalid data")
                 print(msg)
-        print("after netcode")
 
 if __name__ == "__main__":
     main()
