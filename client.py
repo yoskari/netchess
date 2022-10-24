@@ -36,6 +36,7 @@ def listen_for_messages():
             sys.exit(1)
         if type(msg) == dict:
             print("Got game data")
+            print(msg)
             board = msg["board"]
             selected = msg["selected"]
             score = msg["score"]
@@ -109,6 +110,12 @@ while True:
             s.close()
             pygame.quit()
             sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                s.close()
+                pygame.quit()
+                sys.exit(0)
+
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 mouse_x, mouse_y = pygame.mouse.get_pos()

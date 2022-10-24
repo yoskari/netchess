@@ -8,6 +8,7 @@ from movement import *
 
 HOST = '0.0.0.0'
 PORT = 9123
+NUM_PLAYERS = 2
 
 board = [
     [5, 4, 3, 2, 1, 3, 4, 5],
@@ -63,7 +64,10 @@ def listen_for_client(cs):
             print(f"[!] Error: {e}")
             client_sockets.remove(cs)
         else:
-            sender, coordinates = msg.split("<SEP>")
+            try:
+                sender, coordinates = msg.split("<SEP>")
+            except:
+                print("Invalid data, player probably disconnected")
             if sender != player_turn:
                 continue
             mousepos = tuple([int(i) for i in coordinates.split(",")])
@@ -111,6 +115,10 @@ def listen_for_client(cs):
                 print("sending game data to:", players[i])
                 # and send the message
                 client_socket.sendall(pickle.dumps(msg))
+            if i != NUM_PLAYERS:
+                print("Incorrect number of players. Quitting...")
+                sys.exit(1)
+                
 
 while True:
     # we keep listening for new connections all the time
