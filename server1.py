@@ -36,6 +36,11 @@ def main():
                     print("Invalid data, player probably disconnected")
                     running = False
                     thread_running = False
+                    # close client sockets
+                    for cs in client_sockets:
+                        cs.close()
+                    # close server socket
+                    s.close()
                     break
                 if sender != player_turn:
                     continue
