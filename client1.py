@@ -101,8 +101,8 @@ def main():
     
     white = True
 
-    #pygame.event.set_blocked(None)
-    #pygame.event.set_allowed([pygame.QUIT, pygame.MOUSEBUTTONDOWN])
+    pygame.event.set_blocked(None)
+    pygame.event.set_allowed([pygame.QUIT, pygame.MOUSEBUTTONDOWN, pygame.MOUSEMOTION])
     while True:
         for event in pygame.event.get():
             print(event)
