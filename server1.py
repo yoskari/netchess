@@ -41,7 +41,7 @@ def main():
                         cs.close()
                     # close server socket
                     s.close()
-                    break
+                    sys.exit(1)
                 if sender != player_turn:
                     continue
                 mousepos = tuple([int(i) for i in coordinates.split(",")])

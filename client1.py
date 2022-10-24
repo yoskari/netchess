@@ -4,34 +4,33 @@ import sys
 import random
 import pygame
 import pickle
-from threading import Thread
 from functions import print_text, victory
 from constants import *
 
 def main():
-    def listen_for_messages():
-        nonlocal s, board, selected, score, possible_moves, turn, winner
-        while True:
-            msg = s.recv(1024)
-            try:
-                msg = pickle.loads(msg)
-            except Exception as e:
-                print(e)
-                print("Quitting...")
-                pygame.quit()
-                sys.exit(1)
-            if type(msg) == dict:
-                print("Got game data")
-                print(msg)
-                board = msg["board"]
-                selected = msg["selected"]
-                score = msg["score"]
-                possible_moves = msg["possible_moves"]
-                turn = msg["turn"]
-                winner = msg["winner"]
-            else:
-                print("Got invalid data")
-                print(msg)
+    #def listen_for_messages():
+    #    nonlocal s, board, selected, score, possible_moves, turn, winner
+    #    while True:
+    #        msg = s.recv(1024)
+    #        try:
+    #            msg = pickle.loads(msg)
+    #        except Exception as e:
+    #            print(e)
+    #            print("Quitting...")
+    #            pygame.quit()
+    #            sys.exit(1)
+    #        if type(msg) == dict:
+    #            print("Got game data")
+    #            print(msg)
+    #            board = msg["board"]
+    #            selected = msg["selected"]
+    #            score = msg["score"]
+    #            possible_moves = msg["possible_moves"]
+    #            turn = msg["turn"]
+    #            winner = msg["winner"]
+    #        else:
+    #            print("Got invalid data")
+    #            print(msg)
 
     SERVER_HOST = input("server ip: ")
     SERVER_PORT = 9123
@@ -106,8 +105,69 @@ def main():
     pygame.event.set_blocked([pygame.MOUSEMOTION])
     #pygame.event.set_allowed([pygame.QUIT, pygame.MOUSEBUTTONDOWN, pygame.MOUSEMOTION])
     while True:
+        for event in pygame.event.get():
+            print(event)
+            if event.type == pygame.QUIT:
+                s.close()
+                pygame.quit()
+                sys.exit(0)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    s.close()
+                    sys.exit(0)
+    
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    mouse_x, mouse_y = pygame.mouse.get_pos()
+                    msg = f"{client_id}<SEP>{mouse_x},{mouse_y}"
+                    print("sending: ", msg)
+                    s.send(msg.encode())
+    
+        screen.fill(WHITE)
+        display.fill(DARK)
+
+        for y, row in enumerate(board):
+            for x, squere in enumerate(row):
+                white = not white
+                if white:
+                    display.blit(board_tile, (x*TILE_SIZE, y*TILE_SIZE))
+                if squere != 0:
+                    display.blit(images[squere-1], (x*TILE_SIZE, y*TILE_SIZE))
+            white = not white
+
+        if selected != ():
+            selection_rect.x = selected[0]*80
+            selection_rect.y = selected[1]*80
+            pygame.draw.rect(display, BLACK, selection_rect, 2)
+
+        for pmove in possible_moves:
+            move_rect = pygame.Rect(pmove[0]*80, pmove[1]*80, 80, 80)
+            pygame.draw.rect(display, GREEN, move_rect, 2)
+
+        if winner != "":
+            victory(winner, screen)
+
+        screen.blit(display, (70, 70))
+        for i in range(8):
+            print_text(f"{i}", 40, 90+i*80, screen)
+        for i in range(8):
+            print_text(f"{i}", 100+i*80, 30, screen)
+
+        for i, keyvalue in enumerate(score.items()):
+            key, value = keyvalue
+            if i == 0:
+                print_text(f"{key}'s score: {value}", 0, 750, screen, 0)
+            elif i == 1:
+                print_text(f"{key}'s score: {value}", 800, 750, screen, 2)
+        print(f"updating - id: {random.random()}")
+        print_text(f"Turn: {turn}", 400, 750, screen, 1)
+        print_text(f"fps: {int(clock.get_fps())}", 0, 0, screen, 0)
+        pygame.display.update()
+        clock.tick()
         # netcode
-        ready = select.select([s], [], [], 0.05)
+        print("before netcode")
+        ready = select.select([s], [], [], 0.01)
         if ready[0]:
             msg = s.recv(1024)
             try:
@@ -129,65 +189,7 @@ def main():
             else:
                 print("Got invalid data")
                 print(msg)
-        for event in pygame.event.get():
-            print(event)
-            if event.type == pygame.QUIT:
-                s.close()
-                pygame.quit()
-                sys.exit(0)
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    s.close()
-                    sys.exit(0)
-    
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    mouse_x, mouse_y = pygame.mouse.get_pos()
-                    msg = f"{client_id}<SEP>{mouse_x},{mouse_y}"
-                    print("sending: ", msg)
-                    s.send(msg.encode())
-    
-            screen.fill(WHITE)
-            display.fill(DARK)
-    
-            for y, row in enumerate(board):
-                for x, squere in enumerate(row):
-                    white = not white
-                    if white:
-                        display.blit(board_tile, (x*TILE_SIZE, y*TILE_SIZE))
-                    if squere != 0:
-                        display.blit(images[squere-1], (x*TILE_SIZE, y*TILE_SIZE))
-                white = not white
-    
-            if selected != ():
-                selection_rect.x = selected[0]*80
-                selection_rect.y = selected[1]*80
-                pygame.draw.rect(display, BLACK, selection_rect, 2)
-    
-            for pmove in possible_moves:
-                move_rect = pygame.Rect(pmove[0]*80, pmove[1]*80, 80, 80)
-                pygame.draw.rect(display, GREEN, move_rect, 2)
-    
-            if winner != "":
-                victory(winner, screen)
-    
-            screen.blit(display, (70, 70))
-            for i in range(8):
-                print_text(f"{i}", 40, 90+i*80, screen)
-            for i in range(8):
-                print_text(f"{i}", 100+i*80, 30, screen)
-    
-            for i, keyvalue in enumerate(score.items()):
-                key, value = keyvalue
-                if i == 0:
-                    print_text(f"{key}'s score: {value}", 0, 750, screen, 0)
-                elif i == 1:
-                    print_text(f"{key}'s score: {value}", 800, 750, screen, 2)
-            print(f"updating - id: {random.random()}")
-            print_text(f"Turn: {turn}", 400, 750, screen, 1)
-            pygame.display.update()
-            #clock.tick(60)
+        print("after netcode")
 
 if __name__ == "__main__":
     main()
