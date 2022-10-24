@@ -101,8 +101,8 @@ def main():
     
     white = True
 
-    pygame.event.set_blocked(None)
-    pygame.event.set_allowed([pygame.QUIT, pygame.MOUSEBUTTONDOWN, pygame.MOUSEMOTION])
+    pygame.event.set_blocked([pygame.MOUSEMOTION])
+    #pygame.event.set_allowed([pygame.QUIT, pygame.MOUSEBUTTONDOWN, pygame.MOUSEMOTION])
     while True:
         for event in pygame.event.get():
             print(event)
@@ -112,8 +112,8 @@ def main():
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    s.close()
                     pygame.quit()
+                    s.close()
                     sys.exit(0)
     
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -161,7 +161,7 @@ def main():
                     print_text(f"{key}'s score: {value}", 800, 750, screen, 2)
             print_text(f"Turn: {turn}", 400, 750, screen, 1)
             pygame.display.update()
-            clock.tick(30)
+            clock.tick(60)
 
 if __name__ == "__main__":
     main()
