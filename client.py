@@ -27,7 +27,13 @@ def listen_for_messages():
     global board, selected, score, possible_moves, turn, winner
     while True:
         msg = s.recv(1024)
-        msg = pickle.loads(msg)
+        try:
+            msg = pickle.loads(msg)
+        except Exception as e:
+            print(e)
+            print("Quitting...")
+            pygame.quit()
+            sys.exit(1)
         if type(msg) == dict:
             print("Got game data")
             board = msg["board"]

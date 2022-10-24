@@ -130,6 +130,7 @@ while True:
     # start the thread
     t.start()
     if len(client_sockets) > 1:
+        print("starting game")
         msg = {
             "board": board,
             "selected": selected,

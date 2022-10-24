@@ -2,7 +2,7 @@ import pygame
 import sys
 from constants import *
 from movement import *
-from functions import *
+from functions import print_text
 
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_W, SCREEN_H))
@@ -19,23 +19,36 @@ for y in range(2):
         surf.set_colorkey(MAGENTA)
         images.append(surf)
 
+def victory(winner, screen):
+    clock = pygame.time.Clock()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                main()
+
+        print_text("Checkmate!", 400, 400, screen, 1, 64, WHITE)
+        print_text("Checkmate!", 402, 402, screen, 1, 64, BLACK)
+        print_text(f"{winner} has won the game.", 400, 464, screen, 1, 32, WHITE)
+        print_text(f"{winner} has won the game.", 402, 466, screen, 1, 32, BLACK)
+        pygame.display.update()
+        clock.tick(30)
 
 def main():
-# white units
-# 1: king
-# 2: queen
-# 3: bishop
-# 4: knight
-# 5: rook
-# 6: pawn
+#   white units
+#   1: king
+#   2: queen
+#   3: bishop
+#   4: knight
+#   5: rook
+#   6: pawn
 
-# black units
-# 7: king
-# 8: queen
-# 9: bishop
-# 10: knight
-# 11: rook
-# 12: pawn
+#   black units
+#   7: king
+#   8: queen
+#   9: bishop
+#   10: knight
+#   11: rook
+#   12: pawn
     board = [
         [5, 4, 3, 2, 1, 3, 4, 5],
         [6, 6, 6, 6, 6, 6, 6, 6],
@@ -72,7 +85,11 @@ def main():
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                victory(turn, screen)
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+                if event.key == pygame.K_v:
+                    victory(turn, screen)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     mousepos = pygame.mouse.get_pos()
