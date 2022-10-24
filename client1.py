@@ -48,20 +48,17 @@ def main():
     print("waiting for the other player to join...")
     while True:
         try:
-            start_message = s.recv(64).decode()
+            msg = s.recv(1024)
+            msg = pickle.loads(msg)
+            if type(msg) == dict:
+                board = msg["board"]
+                selected = msg["selected"]
+                score = msg["score"]
+                possible_moves = msg["possible_moves"]
+                turn = msg["turn"]
+            break
         except Exception as e:
             print(e)
-        else:
-            if start_message == "start":
-                msg = s.recv(1024)
-                msg = pickle.loads(msg)
-                if type(msg) == dict:
-                    board = msg["board"]
-                    selected = msg["selected"]
-                    score = msg["score"]
-                    possible_moves = msg["possible_moves"]
-                    turn = msg["turn"]
-                break
     
     # make a thread that listens for messages to this client & print them
     t = Thread(target=listen_for_messages)

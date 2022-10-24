@@ -145,8 +145,6 @@ def main():
                 "turn": player_turn + " - " + turn,
             }
             for client_socket in client_sockets:
-                client_socket.send("start".encode())
-            for client_socket in client_sockets:
                 client_socket.send(pickle.dumps(msg))
 
     # close client sockets
