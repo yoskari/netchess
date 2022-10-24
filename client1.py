@@ -1,4 +1,5 @@
 import socket
+import select
 import sys
 import random
 import pygame
@@ -31,6 +32,7 @@ def main():
             else:
                 print("Got invalid data")
                 print(msg)
+
     SERVER_HOST = input("server ip: ")
     SERVER_PORT = 9123
     separator_token = "<SEP>"
@@ -61,11 +63,11 @@ def main():
             print(e)
     
     # make a thread that listens for messages to this client & print them
-    t = Thread(target=listen_for_messages)
-    # make the thread daemon so it ends whenever the main thread ends
-    t.daemon = True
-    # start the thread
-    t.start()
+    #t = Thread(target=listen_for_messages)
+    ## make the thread daemon so it ends whenever the main thread ends
+    #t.daemon = True
+    ## start the thread
+    #t.start()
     
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_W, SCREEN_H))
@@ -104,6 +106,29 @@ def main():
     pygame.event.set_blocked([pygame.MOUSEMOTION])
     #pygame.event.set_allowed([pygame.QUIT, pygame.MOUSEBUTTONDOWN, pygame.MOUSEMOTION])
     while True:
+        # netcode
+        ready = select.select([s], [], [], 0.05)
+        if ready[0]:
+            msg = s.recv(1024)
+            try:
+                msg = pickle.loads(msg)
+            except Exception as e:
+                print(e)
+                print("Quitting...")
+                pygame.quit()
+                sys.exit(1)
+            if type(msg) == dict:
+                print("Got game data")
+                print(msg)
+                board = msg["board"]
+                selected = msg["selected"]
+                score = msg["score"]
+                possible_moves = msg["possible_moves"]
+                turn = msg["turn"]
+                winner = msg["winner"]
+            else:
+                print("Got invalid data")
+                print(msg)
         for event in pygame.event.get():
             print(event)
             if event.type == pygame.QUIT:
@@ -162,7 +187,7 @@ def main():
             print(f"updating - id: {random.random()}")
             print_text(f"Turn: {turn}", 400, 750, screen, 1)
             pygame.display.update()
-            clock.tick(60)
+            #clock.tick(60)
 
 if __name__ == "__main__":
     main()
