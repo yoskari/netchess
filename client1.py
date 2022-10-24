@@ -109,7 +109,7 @@ def main():
             if event.type == pygame.QUIT:
                 s.close()
                 pygame.quit()
-                sys.exit()
+                sys.exit(0)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
@@ -159,6 +159,7 @@ def main():
                     print_text(f"{key}'s score: {value}", 0, 750, screen, 0)
                 elif i == 1:
                     print_text(f"{key}'s score: {value}", 800, 750, screen, 2)
+            print(f"updating - id: {random.random()}")
             print_text(f"Turn: {turn}", 400, 750, screen, 1)
             pygame.display.update()
             clock.tick(60)
