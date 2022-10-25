@@ -1,7 +1,8 @@
-import pygame
+import random
 import socket
 import sys
 import pickle
+import pygame
 from threading import Thread
 from constants import *
 from movement import *
@@ -10,21 +11,29 @@ HOST = '0.0.0.0'
 PORT = 9123
 NUM_PLAYERS = 2
 
+running = True
+reset = 0
 
 def main():
+    global reset
     def listen_for_client(cs):
-        nonlocal running, selected, board, possible_moves, turn, friendly_units, \
+        global running, reset
+        nonlocal selected, board, possible_moves, turn, friendly_units, \
                  score, board_squares, player_turn, winner
         """
         This function keep listening for a message from `cs` socket
         Whenever a message is received, broadcast it to all other connected clients
         """
-        thread_running = True
-        while thread_running:
+        while True:
+            if not running:
+                break
             try:
                 # keep listening for a message from `cs` socket
                 msg = cs.recv(1024).decode()
                 print("Got: ", msg)
+                if msg == "reset":
+                    reset += 1
+                    continue
             except Exception as e:
                 # client no longer connected
                 # remove it from the set
@@ -34,16 +43,9 @@ def main():
                 try:
                     sender, coordinates = msg.split("<SEP>")
                 except:
-                    print("Invalid data, player probably disconnected")
+                    print("Player disconnected. Quitting...")
                     running = False
-                    thread_running = False
-                    # close client sockets
-                    for cs in client_sockets:
-                        cs.close()
-                    # close server socket
-                    s.close()
-                    print("Quitting...")
-                    sys.exit(1)
+                    break
                 if sender != player_turn:
                     continue
                 mousepos = tuple([int(i) for i in coordinates.split(",")])
@@ -125,8 +127,7 @@ def main():
     # listen for upcoming connections
     s.listen(NUM_PLAYERS)
     print(f"[*] Listening as {HOST}:{PORT}")
-    running = True
-    while running:
+    for i in range(NUM_PLAYERS):
         client_socket, client_address = s.accept()
         print(f"[+] {client_address} connected.")
         playername = client_socket.recv(64).decode()
@@ -150,6 +151,40 @@ def main():
                 "score": score,
                 "possible_moves": possible_moves,
                 "turn": player_turn + " - " + turn,
+            }
+            for client_socket in client_sockets:
+                client_socket.send(pickle.dumps(msg))
+
+    while running:
+        # restart the game if got two reset messages
+        if reset >= 2:
+            reset = 0
+            board = [
+                [5, 4, 3, 2, 1, 3, 4, 5],
+                [6, 6, 6, 6, 6, 6, 6, 6],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [12,12,12,12,12,12,12,12],
+                [11,10,9, 8, 7, 9, 10,11],
+            ]
+            selected = ()
+            possible_moves = []
+            player_turn = players[random.randint(0, 1)]
+            turn = player_turn + " - white"
+            score = {}
+            friendly_units = WHITE_UNITS
+            for name in players:
+                score[name] = 0
+            winner = ""
+            msg = {
+                "board": board,
+                "selected": selected,
+                "score": score,
+                "possible_moves": possible_moves,
+                "turn": turn,
+                "winner": winner,
             }
             for client_socket in client_sockets:
                 client_socket.send(pickle.dumps(msg))

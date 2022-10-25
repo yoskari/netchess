@@ -4,25 +4,60 @@ import sys
 import random
 import pygame
 import pickle
-from functions import print_text, victory
 from constants import *
 
-def main():
-    SERVER_HOST = input("server ip: ")
-    SERVER_PORT = 9123
-    separator_token = "<SEP>"
-    
-    # initialize TCP socket
-    s = socket.socket()
-    print(f"[*] Connecting to {SERVER_HOST}:{SERVER_PORT}...")
-    # connect to the server
-    s.connect((SERVER_HOST, SERVER_PORT))
-    print("[+] Connected.")
-    #client_id = input("name: ")
-    client_id = input("name: ")
-    
-    s.send(client_id.encode())
-    print("waiting for the other player to join...")
+def victory(winner, screen, s, client_id):
+    clock = pygame.time.Clock()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_c:
+                    # continue game
+                    screen.fill(WHITE)
+                    print_text("Waiting for the other player...", 400, 400, screen, 1, 64, BLACK)
+                    pygame.display.update()
+                    s.send("reset".encode())
+                    game(s, client_id)
+                if event.key == pygame.K_q:
+                    s.close()
+                    pygame.quit()
+                    sys.exit(0)
+            if event.type == pygame.QUIT:
+                s.close()
+                pygame.quit()
+                sys.exit(0)
+        print_text("Checkmate!", 400, 400, screen, 1, 64, WHITE)
+        print_text("Checkmate!", 402, 402, screen, 1, 64, BLACK)
+        print_text(f"{winner} has won the game.", 400, 464, screen, 1, 32, WHITE)
+        print_text(f"{winner} has won the game.", 402, 466, screen, 1, 32, BLACK)
+        print_text(f"Press", SCREEN_W // 2, SCREEN_H - 150, screen, 1, 48, BLACK)
+        print_text(f"C to play again", 0, SCREEN_H - 100, screen, 0, 32, BLACK)
+        print_text(f"Q to quit", SCREEN_H, SCREEN_H - 100, screen, 2, 32, BLACK)
+        pygame.display.update()
+        clock.tick(30)
+
+def print_text(text, x, y, display, allignment=0, size=32, color=BLACK):
+    """
+    Draws text onto the screen
+    allignments: 0=left, 1=center, 2=right
+    Args:
+        text
+        x
+        y
+        display: surface to draw on
+        allignment: 0=left, 1=center, 2=right (default=0)
+        size: font size
+        color: text color
+    """
+    font = pygame.font.SysFont("Helvetica", size)
+    surf = font.render(text, False, color)
+    if allignment == 1:
+        x = x - surf.get_width() / 2
+    elif allignment == 2:
+        x = x - surf.get_width()
+    display.blit(surf, (x, y))
+
+def game(s, client_id):
     while True:
         try:
             msg = s.recv(1024)
@@ -36,7 +71,7 @@ def main():
             break
         except Exception as e:
             print(e)
-    
+
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_W, SCREEN_H))
     pygame.display.set_caption(f"Chess - {client_id}")
@@ -74,7 +109,6 @@ def main():
     pygame.event.set_blocked([pygame.MOUSEMOTION])
     while True:
         for event in pygame.event.get():
-            print(event)
             if event.type == pygame.QUIT:
                 s.close()
                 pygame.quit()
@@ -87,6 +121,7 @@ def main():
     
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
+                    # send click data
                     mouse_x, mouse_y = pygame.mouse.get_pos()
                     msg = f"{client_id}<SEP>{mouse_x},{mouse_y}"
                     print("sending: ", msg)
@@ -114,7 +149,7 @@ def main():
             pygame.draw.rect(display, GREEN, move_rect, 2)
 
         if winner != "":
-            victory(winner, screen)
+            victory(winner, screen, s, client_id)
 
         screen.blit(display, (70, 70))
         for i in range(8):
@@ -131,8 +166,9 @@ def main():
         print_text(f"Turn: {turn}", 400, 750, screen, 1)
         print_text(f"fps: {int(clock.get_fps())}", 0, 0, screen, 0)
         pygame.display.update()
-        clock.tick()
-        # netcode
+        clock.tick(30)
+
+        # netcode (receiving game data)
         ready = select.select([s], [], [], 0.01)
         if ready[0]:
             msg = s.recv(1024)
@@ -155,6 +191,24 @@ def main():
             else:
                 print("Got invalid data")
                 print(msg)
+
+def main():
+    SERVER_HOST = input("server ip: ")
+    SERVER_PORT = 9123
+    separator_token = "<SEP>"
+    
+    # initialize TCP socket
+    s = socket.socket()
+    print(f"[*] Connecting to {SERVER_HOST}:{SERVER_PORT}...")
+    # connect to the server
+    s.connect((SERVER_HOST, SERVER_PORT))
+    print("[+] Connected.")
+    #client_id = input("name: ")
+    client_id = input("name: ")
+    
+    s.send(client_id.encode())
+    print("waiting for the other player to join...")
+    game(s, client_id)
 
 if __name__ == "__main__":
     main()
