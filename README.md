@@ -1,7 +1,7 @@
 ![chess.png](https://github.com/yoskari/netchess/blob/main/chess.png)
 
 # Netchess
-Chess engine made with python and pygame. (Multiplayer is effectively broken due to mysterious bugs)
+Network chess made with python and pygame.
 
 ## Requirements
 * python3
